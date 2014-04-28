@@ -130,56 +130,6 @@ cp -a fonts $RPM_BUILD_ROOT/usr/share/refind-%{version}/
 /usr/share/refind-%{version}
 /etc/refind.d/
 
-%post
-PATH=$PATH:/usr/local/bin
-# Remove any existing NVRAM entry for rEFInd, to avoid creating a duplicate.
-ExistingEntry=`efibootmgr | grep "rEFInd Boot Manager" | cut -c 5-8`
-if [[ -n $ExistingEntry ]] ; then
-   efibootmgr --bootnum $ExistingEntry --delete-bootnum &> /dev/null
-fi
-
-cd /usr/share/refind-%{version}
-
-if [[ -f /sys/firmware/efi/vars/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c/data ]] ; then
-   IsSecureBoot=`od -An -t u1 /sys/firmware/efi/vars/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c/data | tr -d '[[:space:]]'`
-else
-   IsSecureBoot="0"
-fi
-# Note: Two find operations for ShimFile favors shim over PreLoader -- if both are
-# present, the script uses shim rather than PreLoader.
-declare ShimFile=`find /boot -name shim\.efi -o -name shimx64\.efi -o -name PreLoader\.efi 2> /dev/null | head -n 1`
-if [[ ! -n $ShimFile ]] ; then
-   declare ShimFile=`find /boot -name PreLoader\.efi 2> /dev/null | head -n 1`
-fi
-declare SBSign=`which sbsign 2> /dev/null`
-declare OpenSSL=`which openssl 2> /dev/null`
-
-# Run the rEFInd installation script. Do so with the --shim option
-# if Secure Boot mode is suspected and if a shim program can be
-# found, or without it if not. If the sbsign and openssl programs
-# can be found, do the install using a local signing key. Note that
-# this option is undesirable for a distribution, since it would
-# then require the user to enroll an extra MOK. I'm including it
-# here because I'm NOT a distribution maintainer, and I want to
-# encourage users to use their own local keys.
-if [[ $IsSecureBoot == "1" && -n $ShimFile ]] ; then
-   if [[ -n $SBSign && -n $OpenSSL ]] ; then
-      ./refind-install --shim $ShimFile --localkeys --yes
-   else
-      ./refind-install --shim $ShimFile --yes
-   fi
-else
-   if [[ -n $SBSign && -n $OpenSSL ]] ; then
-      ./refind-install --localkeys --yes
-   else
-      ./refind-install --yes
-   fi
-fi
-
-# CAUTION: Don't create a %preun or a %postun script that deletes the files
-# installed by refind-install, since that script will run after an update,
-# thus wiping out the just-updated files.
-
 %changelog
 * Sun Aug 13 2017 R Smith <rodsmith@rodsbooks.com> - 0.11.0
 - Updated spec file for 0.11.0
