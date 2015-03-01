@@ -1021,7 +1021,8 @@ InstallOnLinux() {
    if [[ $TargetDir == "/EFI/BOOT" ]] ; then
       MountDefaultTarget
    else
-      FindMountedESP
+      #FindMountedESP
+      InstallDir="/boot/efi"
       DetermineTargetDir
    fi
    CpuType=`uname -m`
@@ -1067,10 +1068,10 @@ InstallOnLinux() {
 
    CheckSecureBoot
    CopyRefindFiles
-   if [[ "$TargetDir" != "/EFI/BOOT" && "$TargetDir" != "/EFI/Microsoft/Boot" ]] ; then
-      AddBootEntry
-      GenerateRefindLinuxConf
-   fi
+   #if [[ "$TargetDir" != "/EFI/BOOT" && "$TargetDir" != "/EFI/Microsoft/Boot" ]] ; then
+   #   AddBootEntry
+   #   GenerateRefindLinuxConf
+   #fi
 } # InstallOnLinux()
 
 #
