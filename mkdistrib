@@ -25,10 +25,10 @@ SignIt=1
 MakeRpm=1
 MakeDebian=1
 MakeZip=1
-KeysDir=/mnt/refind
 KeysInfo=`df $KeysDir 2> /dev/null | grep $KeysDir`
 StartDir=`pwd`
 SBSign=`which sbsign 2> /dev/null`
+KeysDir=$StartDir/keys/private
 
 ShowUsage() {
    echo "Usage:"
@@ -218,7 +218,7 @@ set -e
 make clean
 
 # Remove temporary files from the "debian" subdirectory
-rm -rf debian/refind debian/*.log
+dh_clean
 
 # Convert man pages to HTML form
 man2html docs/man/mkrlconf.8 > docs/refind/mkrlconf.html
@@ -226,22 +226,13 @@ man2html docs/man/mvrefind.8 > docs/refind/mvrefind.html
 man2html docs/man/refind-mkdefault.8 > docs/refind/refind-mkdefault.html
 man2html docs/man/refind-install.8 > docs/refind/refind-install.html
 
-mkdir -p ../snapshots/$Version
-TargetDir=`cd -P ../snapshots/$Version && pwd`
+mkdir -p snapshots/$Version
+TargetDir=`cd -P snapshots/$Version && pwd`
 echo $TargetDir
 
 if [[ ! -n $SBSign && $SignIt == 1 ]] ; then
    echo "Can't find sbsign binary! Aborting!"
    exit 1
-fi
-
-if [[ ! -n $KeysInfo && $SignIt == 1 ]] ; then
-   mount $KeysDir
-   if [[ $? -ne 0 ]] ; then
-      echo "Error mounting $KeysDir! Aborting!"
-      echo ""
-      exit 1
-   fi
 fi
 
 MakeTarball
