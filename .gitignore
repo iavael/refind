@@ -1,0 +1,4 @@
+/snapshots/**
+!/snapshots/.keep
+/keys-private/**
+!/keys-private/.keep
