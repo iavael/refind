@@ -1,4 +1,5 @@
-Summary: EFI boot manager software
+%global debug_package %{nil}
+
 Name: refind
 Version: 0.11.0
 Release: 1%{?dist}
@@ -6,7 +7,7 @@ Summary: EFI boot manager software
 License: GPLv3
 URL: http://www.rodsbooks.com/refind/
 Group: System Environment/Base
-Source: refind-src-%version.tar.gz
+Source: https://sourceforge.net/projects/refind/files/%{version}/refind-src-%{version}.tar.gz
 Requires: efibootmgr
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
@@ -50,13 +51,7 @@ Linux kernels that provide EFI stub support.
 %setup -q
 
 %build
-if [[ -d /usr/local/UDK2014 ]] ; then
-   make
-   make fs
-else
-   make gnuefi
-   make fs_gnuefi
-fi
+%make_build all_gnuefi gptsync_gnuefi
 
 %install
 rm -rf $RPM_BUILD_ROOT
